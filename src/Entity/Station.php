@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\LatestDataController;
 use App\Controller\WeatherAggregateController;
 use App\Controller\WeatherController;
 use App\Traits\FromArrayTrait;
@@ -18,7 +19,15 @@ use App\Traits\FromArrayTrait;
                 ],
             'path' => '/stations/weather',
             'controller' => WeatherAggregateController::class
-        ]
+        ],
+        'latest' => [
+            'method' => 'GET',
+            'openapi_context' => [
+                'summary' => 'Retrieves latest average weather data point'
+            ],
+            'path' => '/stations/latest',
+            'controller' => LatestDataController::class
+        ],
     ],
     itemOperations: [
         'get',
@@ -29,7 +38,15 @@ use App\Traits\FromArrayTrait;
             ],
             'path' => '/stations/{id}/weather',
             'controller' => WeatherController::class
-        ]
+        ],
+        'station_latest' => [
+            'method' => 'GET',
+            'openapi_context' => [
+                'summary' => 'Retrieves latest weather data point for station with given ID'
+            ],
+            'path' => '/stations/{id}/latest',
+            'controller' => LatestDataController::class
+        ],
     ]
 )]
 class Station

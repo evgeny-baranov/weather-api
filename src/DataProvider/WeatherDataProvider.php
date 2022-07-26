@@ -32,7 +32,7 @@ class WeatherDataProvider implements
      * @throws InvalidArgumentException
      */
     public function getCollection(string $resourceClass, string $operationName = null): array {
-        return $this->cache->get(__METHOD__, function (ItemInterface $item) {
+        return $this->cache->get(__METHOD__ . 'zzz', function (ItemInterface $item) {
             $item->expiresAfter(5 * 60 * 60);
 
             $collection = [];

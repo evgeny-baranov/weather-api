@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Weather;
 use App\Entity\WeatherData;
 use App\Repository\WeatherRepository;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,7 +25,7 @@ class WeatherAggregateController extends AbstractController
 
     /**
      * @return iterable
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     #[Route(
         path: '/stations/weather',

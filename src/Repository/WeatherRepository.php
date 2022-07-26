@@ -66,4 +66,15 @@ class WeatherRepository
         }
         return $first;
     }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function getLatest(?Station $station = null): WeatherDataInterface {
+        $collection = is_null($station)
+            ? $this->getAverage()
+            : $this->getForStation($station);
+
+        return array_pop($collection);
+    }
 }

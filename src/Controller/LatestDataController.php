@@ -2,14 +2,15 @@
 
 namespace App\Controller;
 
+use App\Contracts\WeatherDataInterface;
+use App\Entity\Weather;
 use App\Entity\WeatherData;
 use App\Repository\StationRepository;
 use App\Repository\WeatherRepository;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-class WeatherController extends AbstractController
+class LatestDataController extends AbstractController
 {
     private WeatherRepository $weatherRepository;
 
@@ -24,21 +25,28 @@ class WeatherController extends AbstractController
         $this->stationRepository = $stationRepository;
     }
 
-    /**
-     * @param int $id
-     * @return iterable
-     * @throws InvalidArgumentException
-     */
     #[Route(
-        path: '/stations/{id}/weather',
-        name: 'get_station_weather',
+        path: '/stations/{id}/latest',
+        name: 'get_station_latest',
         defaults: [
             '_api_resource_class' => WeatherData::class,
-            '_api_collection_operation_name' => 'station_weather'
+            '_api_collection_operation_name' => 'station_latest'
         ],
         methods: ['GET']
     )]
-    public function __invoke(int $id): iterable {
-        return $this->weatherRepository->getForStation($this->stationRepository->getById($id));
+    #[Route(
+        path: '/stations/latest',
+        name: 'get_latest',
+        defaults: [
+            '_api_resource_class' => WeatherData::class,
+            '_api_collection_operation_name' => 'latest'
+        ],
+        methods: ['GET']
+    )]
+    public function __invoke(?int $id = null): WeatherDataInterface {
+        return $this->weatherRepository->getLatest(isset($id)
+            ? $this->stationRepository->getById($id)
+            : null
+        );
     }
 }
