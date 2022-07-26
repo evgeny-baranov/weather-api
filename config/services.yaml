@@ -25,3 +25,8 @@ services:
     'App\DataProvider\StationDataProvider':
         tags: [ { name: 'api_platform.collection_data_provider', priority: 2 }, { name: 'api_platform.item_data_provider', priority: 2 }]
         autoconfigure: false
+
+    'App\Listener\ApiLogListener':
+        tags:
+            - { 'name': 'monolog.logger', 'channel': 'request_log' }
+            - { 'name': 'kernel.event_listener', 'event': 'kernel.terminate', 'method': 'onKernelTerminate' }

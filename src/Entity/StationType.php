@@ -16,25 +16,13 @@ class StationType
     const UNITS_IMPERIAL = 'imperial';
     const UNITS_METRIC = 'metric';
 
-    /**
-     * @var int
-     */
-    private $id;
+    private int $id;
 
-    /**
-     * @var string
-     */
-    private $fileNameMask;
+    private string $fileNameMask;
 
-    /**
-     * @var string
-     */
-    private $fileFormat;
+    private string $fileFormat;
 
-    /**
-     * @var string
-     */
-    private $units;
+    private string $units;
 
     /**
      * @param array|null $data

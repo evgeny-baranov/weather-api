@@ -3,50 +3,57 @@
 namespace App\DataProvider;
 
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
+use App\Contracts\WeatherDataInterface;
 use App\Entity\Station;
 use App\Entity\StationType;
 use App\Entity\Weather;
+use CallbackFilterIterator;
+use DirectoryIterator;
 use Exception;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class WeatherDataProvider implements
     CollectionDataProviderInterface
 {
     const APP_DATA_DIR = '/app/data';
 
-    /**
-     * @var StationDataProvider
-     */
-    private $stationDataProvider;
+    private StationDataProvider $stationDataProvider;
+    private FilesystemAdapter $cache;
 
-    /**
-     * @var
-     */
-    private $runtimeCache;
-
-    /**
-     * @param StationDataProvider $stationDataProvider
-     */
     public function __construct(StationDataProvider $stationDataProvider) {
         $this->stationDataProvider = $stationDataProvider;
+        $this->cache = new FilesystemAdapter();
     }
 
     /**
      * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public function getCollection(string $resourceClass, string $operationName = null): iterable {
-        $stations = $this->stationDataProvider->getCollection(Station::class);
+    public function getCollection(string $resourceClass, string $operationName = null): array {
+        return $this->cache->get(__METHOD__, function (ItemInterface $item) {
+            $item->expiresAfter(5 * 60 * 60);
 
-        foreach ($stations as $station) {
-            yield from $this->loadStationData($station);
-        }
+            $collection = [];
+            $stations = $this->stationDataProvider->getCollection(Station::class);
+            foreach ($stations as $station) {
+                $collection = array_merge($collection, $this->loadStationData($station));
+            }
+            usort($collection, function (WeatherDataInterface $item1, WeatherDataInterface $item2) {
+                return $item1->getTime() <=> $item2->getTime();
+            });
+
+            return $collection;
+        });
     }
 
     /**
      * @param Station $station
-     * @return iterable
+     * @return array
      * @throws Exception
      */
-    protected function loadStationData(Station $station): iterable {
+    protected function loadStationData(Station $station): array {
         $files = $this->getFilesByMask(
             self::APP_DATA_DIR,
             $station->getType()->getFileNameMask(),
@@ -72,10 +79,9 @@ class WeatherDataProvider implements
                 $item = (new Weather())->setRawData($item, $station);
             }
             $data = array_merge($data, $daily_data);
-            $this->runtimeCache[$station->getId()] = $data;
         }
 
-        return $this->runtimeCache[$station->getId()];
+        return $data;
     }
 
     /**
@@ -85,15 +91,14 @@ class WeatherDataProvider implements
      * @return iterable
      */
     protected function getFilesByMask(string $dirName, string $mask, string $ext): iterable {
-        $dir = opendir($dirName);
-        $files = [];
-        while ($file = readdir($dir)) {
-            $files[] = $file;
-        }
-
-        return array_values(array_filter($files, function (string $f) use ($mask, $ext): bool {
-            return substr($f, -strlen($ext) - 1) === ".$ext" && preg_match("/^$mask/", $f);
-        }));
+        return yield from (new CallbackFilterIterator(
+            new DirectoryIterator($dirName),
+            function (DirectoryIterator $fileInfo) use ($mask, $ext): bool {
+                return $fileInfo->isFile()
+                    && $fileInfo->getExtension() == $ext
+                    && preg_match("/^$mask/", $fileInfo->getFilename());
+            }
+        ));
     }
 
     /**
@@ -104,14 +109,5 @@ class WeatherDataProvider implements
      */
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool {
         return Weather::class === $resourceClass;
-    }
-
-    /**
-     * @param Station $station
-     * @return iterable
-     * @throws Exception
-     */
-    public function getStationData(Station $station): iterable {
-        return $this->runtimeCache[$station->getId()] ?? $this->loadStationData($station);
     }
 }

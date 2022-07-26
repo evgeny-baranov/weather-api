@@ -2,49 +2,45 @@
 
 namespace App\Entity;
 
-use App\Traits\FromArrayTrait;
 use ApiPlatform\Core\Annotation\ApiResource;
-use ApiPlatform\Core\Annotation\ApiProperty;
+use App\Controller\WeatherAggregateController;
 use App\Controller\WeatherController;
+use App\Traits\FromArrayTrait;
 
-/**
- * @ApiResource(
- *     collectionOperations={
- *         "get"
- *     },
- *     itemOperations={
- *         "get",
- *         "station_weather" = {
- *              "method"="GET",
- *              "path"="/stations/{id}/weather",
- *              "controller"=WeatherController::class
- *          },
- *         "station_weather_aggregate" = {
- *              "method"="GET",
- *              "path"="/stations/weather",
- *              "controller"=WeatherAggregateController::class
- *          }
- *     },
- * )
- */
+
+#[ApiResource(
+    collectionOperations: [
+        'get',
+        'station_weather_aggregate' => [
+            'method' => 'GET',
+            'openapi_context' => [
+                'summary' => 'Retrieves average weather data points for all stations'
+                ],
+            'path' => '/stations/weather',
+            'controller' => WeatherAggregateController::class
+        ]
+    ],
+    itemOperations: [
+        'get',
+        'station_weather' => [
+            'method' => 'GET',
+            'openapi_context' => [
+                'summary' => 'Retrieves weather data points for station with given ID'
+            ],
+            'path' => '/stations/{id}/weather',
+            'controller' => WeatherController::class
+        ]
+    ]
+)]
 class Station
 {
     use FromArrayTrait;
 
-    /**
-     * @var int
-     */
-    private $id;
+    private int $id;
 
-    /**
-     * @ApiProperty(attributes={"openapi_context"={"type"="string"}})
-     */
-    private $name;
+    private string $name;
 
-    /**
-     * @var StationType
-     */
-    private $type;
+    private StationType $type;
 
     /**
      * @param array|null $data
@@ -71,16 +67,16 @@ class Station
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
-    public function setName($name): void {
+    public function setName(string $name): void {
         $this->name = $name;
     }
 

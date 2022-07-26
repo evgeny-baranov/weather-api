@@ -7,10 +7,8 @@ use App\Entity\Station;
 
 class StationRepository
 {
-    /**
-     * @var StationDataProvider
-     */
-    private $stationDataProvider;
+
+    private StationDataProvider $stationDataProvider;
 
     /**
      * @param StationDataProvider $stationDataProvider

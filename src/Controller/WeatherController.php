@@ -2,25 +2,17 @@
 
 namespace App\Controller;
 
-use ApiPlatform\Core\Exception\ResourceClassNotSupportedException;
+use App\Entity\WeatherData;
 use App\Repository\StationRepository;
 use App\Repository\WeatherRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Entity\Station;
-use App\Entity\Weather;
 
 class WeatherController extends AbstractController
 {
-    /**
-     * @var WeatherRepository
-     */
-    private $weatherRepository;
+    private WeatherRepository $weatherRepository;
 
-    /**
-     * @var StationRepository
-     */
-    private $stationRepository;
+    private StationRepository $stationRepository;
 
     /**
      * @param WeatherRepository $weatherRepository
@@ -32,20 +24,20 @@ class WeatherController extends AbstractController
     }
 
     /**
-     * @Route(
-     *     path="/stations/weather",
-     *     name="station_weather_aggregate",
-     *     methods={"GET"},
-     *     defaults={
-     *        "_api_resource_class"=Weather::class,
-     *        "_api_collection_operation_name"="station_weather"
-     *     }
-     *  )
-     * @param int|null $id
-     * @return iterable|void
-     * @throws ResourceClassNotSupportedException
+     * @param int $id
+     * @return iterable
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function __invoke(?int $id = null): iterable {
-        return $this->weatherRepository->getAll();
+    #[Route(
+        path: '/stations/{id}/weather',
+        name: 'get_station_weather',
+        defaults: [
+            '_api_resource_class' => WeatherData::class,
+            '_api_collection_operation_name' => 'station_weather'
+        ],
+        methods: ['GET']
+    )]
+    public function __invoke(int $id): iterable {
+        return $this->weatherRepository->getForStation($this->stationRepository->getById($id));
     }
 }

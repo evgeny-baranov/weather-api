@@ -14,7 +14,7 @@ class StationDataProvider implements
     RestrictedDataProviderInterface
 {
 
-    private $data = [
+    private array $data = [
         [
             'id' => 1,
             'name' => 'Station 1',
@@ -67,9 +67,9 @@ class StationDataProvider implements
      * @param $id
      * @param string|null $operationName
      * @param array $context
-     * @return Station|mixed|object|null
+     * @return Station|null
      */
-    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []) {
+    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Station {
         foreach ($this->getCollection($resourceClass) as $item) {
             if ($item->getId() === $id) {
                 return $item;

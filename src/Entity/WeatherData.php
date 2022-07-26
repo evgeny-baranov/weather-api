@@ -5,14 +5,11 @@ namespace App\Entity;
 use App\Contracts\WeatherDataInterface;
 use App\Traits\WeatherDataTrait;
 
-class AggregatedWeatherData implements WeatherDataInterface
+class WeatherData implements WeatherDataInterface
 {
     use WeatherDataTrait;
 
-    /**
-     * @var string
-     */
-    protected $units;
+    protected string $units;
 
     /**
      * @return string
@@ -22,9 +19,9 @@ class AggregatedWeatherData implements WeatherDataInterface
     }
 
     /**
-     * @return bool
+     * @param string $units
      */
-    public function isImperial(): bool {
-        return $this->getUnits() == StationType::UNITS_IMPERIAL;
+    public function setUnits(string $units): void {
+        $this->units = $units;
     }
 }

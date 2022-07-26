@@ -13,30 +13,15 @@ class Weather implements WeatherDataInterface
     use FromArrayTrait;
     use WeatherDataTrait;
 
-    /**
-     * @var int
-     */
-    private $id;
+    private int $id;
 
-    /**
-     * @var Station
-     */
-    private $station;
+    private Station $station;
 
-    /**
-     * @var float
-     */
-    private $rain;
+    private float $rain;
 
-    /**
-     * @var float
-     */
-    private $light;
+    private float $light;
 
-    /**
-     * @var string
-     */
-    private $batteryLevel;
+    private string $batteryLevel;
 
     /**
      * @param array|null $data
@@ -59,20 +44,6 @@ class Weather implements WeatherDataInterface
      */
     public function setId(int $id): void {
         $this->id = $id;
-    }
-
-    /**
-     * @return Station
-     */
-    public function getStation(): Station {
-        return $this->station;
-    }
-
-    /**
-     * @param Station $station
-     */
-    public function setStation(Station $station): void {
-        $this->station = $station;
     }
 
     /**
@@ -112,14 +83,32 @@ class Weather implements WeatherDataInterface
         }
     }
 
-    function getAggregatedData(): AggregatedWeatherData {
-
-    }
-
     /**
      * @return string
      */
     public function getUnits(): string {
         return $this->getStation()->getType()->getUnits();
+    }
+
+    /**
+     * @return Station
+     */
+    public function getStation(): Station {
+        return $this->station;
+    }
+
+    /**
+     * @param Station $station
+     */
+    public function setStation(Station $station): void {
+        $this->station = $station;
+    }
+
+    /**
+     * @param string $units
+     * @return void
+     */
+    public function setUnits(string $units): void {
+        $this->getStation()->getType()->setUnits($units);
     }
 }
